@@ -1,8 +1,8 @@
 
 print "Starting analyzing..."
 
-UNAFFECTED_FILES = ["unaffected_AU016203.csv"]
-AFFECTED_FILES = ["affected_AU1809303.csv"]
+UNAFFECTED_FILES = ["unaffected_AU016203.csv.stripped.csv"]
+AFFECTED_FILES = ["affected_AU1809303.csv.stripped.csv"]
 
 # Mappings from human ID to another mapping of position to variant.
 unaffected_variant_info = {}
@@ -15,8 +15,10 @@ for unaffected_file in UNAFFECTED_FILES:
 	unaffected_info = {}
 	with open("data/" + unaffected_file, "r") as ins:
 		for line in ins:
+			if len(line.split(",")) != 3:
+				continue
 			pos = line.split(",")[0]
-			bp = line.split(",")[2]
+			bp = line.split(",")[1]
 			unaffected_info[pos] = bp
 	unaffected_variant_info[unaffected_file] = unaffected_info
 
@@ -27,8 +29,10 @@ for affected_file in AFFECTED_FILES:
 	affected_info = {}
 	with open("data/" + affected_file, "r") as ins:
 		for line in ins:
+			if len(line.split(",")) != 3:
+				continue
 			pos = line.split(",")[0]
-			bp = line.split(",")[2]
+			bp = line.split(",")[1]
 			affected_info[pos] = bp
 	affected_variant_info[affected_file] = affected_info
 
@@ -39,7 +43,7 @@ varying_positions = set()
 for unaffected in unaffected_variant_info:
 	for affected in affected_variant_info:
 		for pos_unaffected in unaffected:
-			if unaffected[pos_unaffected] != affected[pos_affected]:
+			if unaffected_variant_info[unaffected][pos_unaffected] != affected_variant_info[affected][pos_affected]:
 				varying_positions.add((pos_affected, pos_unaffected))
 
 print "Checkpoint 4"
