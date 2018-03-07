@@ -5,7 +5,11 @@ To strip a variant file, run:
 python variant_stripper.py and modify the variant file
 you want to strip from. 
 
-./clean_file.sh - converts the .csv file downloaded from athena into tab limited file, without the double quotes.
+coomands_Athena_data - sql commands to get the filtered data from Athena
+
+data - folder with files directly downloaded from Athena
+
+./clean_file.sh - converts the .csv file downloaded from athena into tab limited file, without the double quotes. run as: $ ./clean_file.sh <filename>
 
 unaffected_family.txt - list of unaffected males that have family with at least 1 affected male too.
 
