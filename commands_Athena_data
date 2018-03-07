@@ -1,0 +1,24 @@
+(1) Choose one or two unaffected male children from the dataset who has 1 or more parents with ASD. 
+
+    SELECT * FROM pedigree WHERE (pheno=1 AND sex=1) AND (father_id!='0' OR mother_id!='0') AND fam_id IN
+    (SELECT fam_id FROM pedigree WHERE pheno=2 AND (father_id='0' OR mother_id='0'));
+
+    Then as a compare group, we select a few male children with the same conditions as above except they are affected with ASD:
+
+    SELECT * FROM pedigree WHERE (pheno=2 AND sex=1) AND (father_id!='0' OR mother_id!='0') AND fam_id IN
+    (SELECT fam_id FROM pedigree WHERE pheno=2 AND (father_id='0' OR mother_id='0'));
+
+    (2) Using the IDs from the children we select, download all of their point-mutation variant information:
+
+    SELECT * FROM vars WHERE id='AU***' AND filter='PASS' AND length(ref) = 1 AND length(alt) = 1 AND ref != '.' AND alt != '.';
+
+    Where 'AU***' is the chosen ID of the child we want to get the genomic variant info from.
+
+    [[[ (3) Optional: This data will be huge, so find a way to limit the variant data query to make the data size a bit smaller. ]]]
+
+    (4) Do a comparative analysis between the variants and see regions that tend to be different across the two groups but the same within the group. 
+
+    (5) Look up these variant-level information from the "anno" table to get some preliminary insight into which variants are of interest. 
+
+    This is for Wednesday. Stacie and I did 1 and 2 today (perhaps we should push these CSVs to GitHub after we filter them down a bit more?)
+
