@@ -1,8 +1,8 @@
 
 print "Starting analyzing..."
 
-UNAFFECTED_FILES = ["unaffected_AU016203.csv.stripped.csv"]
-AFFECTED_FILES = ["affected_AU1809303.csv.stripped.csv"]
+UNAFFECTED_FILES = []
+AFFECTED_FILES = []
 
 # Mappings from human ID to another mapping of position to variant.
 unaffected_variant_info = {}

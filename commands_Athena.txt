@@ -1,0 +1,125 @@
+First, we get a list of the unaffected male children from the dataset who have 1 or more parents with ASD. This involved running the following SQL command:
+ 
+SELECT * FROM pedigree WHERE (pheno=1 AND sex=1) AND (father_id != '0' OR mother_id!='0') AND fam_id IN
+(SELECT fam_id FROM pedigree WHERE pheno=2 AND (father_id='0' OR mother_id='0'));
+ 
+This gives us the following list of unaffected males in families where at least 1 parent has ASD:
+
+AU016203, AU2756305, AU081206, AU1065301, AU1348302, AU1921302, AU3199301, AU019404,  AU1025302
+Then as a compare group, we select a few male children with the same parental conditions as above except they are affected with ASD:
+ 
+SELECT * FROM pedigree WHERE (pheno=2 AND sex=1) AND (father_id!='0' OR mother_id!='0') AND fam_id IN
+(SELECT fam_id FROM pedigree WHERE pheno=2 AND (father_id='0' OR mother_id='0'));
+ 
+The above query returns exactly 117 results.
+
+Using the IDs we collected above, we can now download all of the point-mutation variant information per child. For example, to get the information for the first child in our list of protected males:
+ 
+SELECT * FROM vars WHERE id='AU016203' AND filter='PASS' AND length(ref) = 1 AND length(alt) = 1 AND ref != './.' AND alt != './.';
+
+We did this for all 9 IDs of unaffected children listed above.
+
+We then did comparisons between the following (unaffected, affected) sibling pairs:
+
+(AU019404,AU019405)
+(AU019404,AU019406)
+(AU081206,AU081205)
+(AU1025302,AU1025301)
+(AU1065301,AU1065303)
+(AU1065301,AU1065304)
+(AU1065301,AU1065302)
+(AU1348302,AU1348303)
+(AU2756305,AU2756306)
+(AU3199301,AU3199303)
+
+Per comparison, extract all positions where “alt” of one individual is different from “alt” of another individual in the pair.
+The SQL command below outputs joined tables based on pos and chr and differing alt bases between two individuals. We run the
+following per command for all above the above 10 pairs:
+
+SELECT *
+FROM 
+    (SELECT *
+    FROM vars
+    WHERE id='AU2756305'
+            AND filter='PASS'
+            AND length(ref) = 1
+            AND length(alt) = 1
+            AND ref != '.'
+            AND alt != '.'
+            AND gt != './.'
+            AND gt != '.') AS ind1
+INNER JOIN 
+    (SELECT *
+    FROM vars
+    WHERE id='AU2756306'
+            AND filter='PASS'
+            AND length(ref) = 1
+            AND length(alt) = 1
+            AND ref != '.'
+            AND alt != '.'
+            AND gt != './.'
+            AND gt != '.') AS ind2
+    ON (ind1.pos = ind2.pos
+        AND ind1.chr = ind2.chr
+        AND ind1.ref = ind2.ref
+        AND ind1.alt = ind2.alt)
+WHERE (ind1.gt!=ind2.gt)
+        AND NOT ((ind1.gt='1/0'
+        AND ind2.gt='0/1')
+        AND (ind1.gt='0/1'
+        AND ind2.gt='1/0'))
+
+
+We constructed the following SQL command to get gene annotations and join the lists of 
+gene annotations from all pairs and extract only the ones that appear in all pairs:
+
+SELECT DISTINCT anno.pos,
+         anno.chr,
+         gene,
+         anno.ref,
+         anno.alt,
+         af
+FROM anno
+INNER JOIN 
+    (SELECT ind1.pos AS pos,
+         ind1.chr AS chr,
+         ind1.ref AS ref,
+         ind1.alt AS alt
+    FROM 
+        (SELECT *
+        FROM vars
+        WHERE id='AU2756305'
+                AND filter='PASS'
+                AND length(ref) = 1
+                AND length(alt) = 1
+                AND ref != '.'
+                AND alt != '.'
+                AND gt != './.'
+                AND gt != '.') AS ind1
+        INNER JOIN 
+            (SELECT *
+            FROM vars
+            WHERE id='AU2756306'
+                    AND filter='PASS'
+                    AND length(ref) = 1
+                    AND length(alt) = 1
+                    AND ref != '.'
+                    AND alt != '.'
+                    AND gt != './.'
+                    AND gt != '.') AS ind2
+                ON (ind1.pos = ind2.pos
+                    AND ind1.chr = ind2.chr
+                    AND ind1.ref = ind2.ref
+                    AND ind1.alt = ind2.alt)
+            WHERE (ind1.gt!=ind2.gt)
+                    AND NOT ((ind1.gt='1/0'
+                    AND ind2.gt='0/1')
+                    AND (ind1.gt='0/1'
+                    AND ind2.gt='1/0'))) AS matched
+            ON (anno.pos = matched.pos
+                AND anno.chr = matched.chr
+                AND anno.ref = matched.ref
+                AND anno.alt = matched.alt)
+    WHERE func = 'exonic';
+
+

@@ -1,0 +1,88 @@
+
+CS273A Final Project: Autism
+
+Sneha Goenka, Stacie Kim, Ryan McKinney, Peter Washington, Sophia Zheng
+
+---------------------------------------------------------------------------
+
+The code below contain various parts of our pipeline. In general, this project
+involved writing scripts to conduct various parts, but the SQL code was
+executed on the Amazon Athena service. Furthermore, several intermediate files
+were generated, which we do not include here. We only include the final output
+in the "data" folder.
+
+The code snippets are below:
+
+(1) The SQL commands we ran on the Amazon AWS Athena service are contained
+in the "commands_Athena.txt" file, including an explanation of what they do.
+
+(2) "get_varying_positions.py" contains legacy code we at first tried when 
+trying to get the point mutation differences between two individuals. However,
+this was too slow on Python and we switched to Athena. To use, update the
+AFFECTED_FILES and UNAFFECTED_FILES global variables to include filenames
+in the data/ directory of Athena CSV files for unaffected and affected males,
+then run "python get_varying_positions.py"
+
+(3) "clean_file.sh" is a short script we created to clean the dataset 
+downloaded from Athena. This script is used in "intersect.sh"
+
+(4) The "agg_anno_genos.sh" script finds variants that are overexpressed in our 
+n=9 group based on the population allele frequency. Because our n is small, we 
+look at observed - expected and then filter for (obs-exp) > X where X is a cutoff.
+A low x will give more variants, while a high x will filter more. This filtering can 
+be done in the last awk command, or it can be done in the SQL table uploaded into the 
+iHart database. The code is commented as is, as it runs on big data.
+
+(5) The "intersect.sh" script joins the lists of gene annotations from all pairs.
+It requires intermediate files from above.
+
+(6) "chromosome_visualizer.py" created a visualization of the chromosome location
+of each of the variants that occur frequently in the unaffected males but not in
+the affected males.
+
+(7) "chromosome_representation.png" contains a plot created from (6), not
+included in our final presentation, and 
+"chromosome_representation_normalized.png" contains a version of this plot in
+a histogram normalized by chromosome size.
+
+---------------------------------------------------------------------------
+
+A description of the data is below:
+
+affected_family.txt - a list of affected individual phenotype data we extracted
+from Athena
+
+affected_males_affected_parents.csv - a list of phenotype data for the entire
+family set we conducted our analysis on
+
+all_homoz_goi.txt - all homozygous genes of interest
+
+all_homoz_goi_uniq.txt - all unique homozygous genes of interest
+
+chromosome_frequencies_normalized.csv - frequency of point mutations by chromosome size
+
+final_gene_list.txt - 
+
+gene_list_103.bed - BED list of genes obtained from analysis of unaffected vs. affected,
+only looking at coding exons
+
+gene_list_103 - list of genes obtained from analysis of unaffected vs. affected, only
+looking at coding exons
+
+gene_list_whole_genome.bed - BED list of genes obtained from analysis of unaffected vs. 
+affected, looking at the whole genome
+
+gene_list_whole_genome - list of genes obtained from analysis of unaffected vs. 
+affected, looking at the whole genome
+
+genes_of_interest.txt - genes to perform enrichment analysis on
+
+genes_of_interest_analysis_2.csv - genes to perform enrichment analysis on, including
+additional metadata
+
+goi_uniq.txt - a unique list of genes of interest for the "agg_anno_genos.sh" script
+
+unaffected_family.txt - phenotype info for unaffected family members
+
+unaffected_males_affected_parents.csv - phenotype info for affected parents
+
